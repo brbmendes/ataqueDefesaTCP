@@ -11,6 +11,7 @@
 #define TCP_HALF_OPENING "TCP Half-Opening"
 #define STEALTH_SCAN "Stealth Scan or TCP FIN"
 #define SYN_ACK "SYN/ACK"
+#define SIZE 500
 
 
 int main(int argc, char **argv) {
@@ -103,9 +104,10 @@ int main(int argc, char **argv) {
             Destination : %s\n", interface, start_port, end_port, attack, attempts, source, dest) ;
 
     for(int i = 0 ; i < int_attempts ; i++){
-        char* command = "./bin/ipv6_send ";
-        strncat(command, interface, sizeof(interface));
-        printf("%s\n", command);
+        char* tmp = "./bin/ipv6_send ";
+        char command[SIZE];
+        strcpy(command, tmp);
+        strcat(command, interface);
         int status = system(command);
     }
     
