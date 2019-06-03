@@ -86,7 +86,8 @@ int main(int argc, char **argv)
 
 	// Destination URL or IPv6 address: you need to fill this out
 	strcpy(target, "fe80::5e26:aff:fe6e:aa88");
-
+	// 2001:1bcd:123:1:1413:e4de:53f3:197
+	
 	// Fill out hints for getaddrinfo().
 	memset(&hints, 0, sizeof(struct addrinfo));
 	hints.ai_family = AF_INET6;

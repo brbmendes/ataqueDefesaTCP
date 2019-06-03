@@ -10,8 +10,8 @@ void show_help(char *name) {
     fprintf(stderr, "\n\
             [usage] %s <options>\n\n\
             -h                                      Show this help.\n\
-            -s initial_port                         Initial port range.\n\
-            -e final_port                           Final port range. \n\
+            -i initial_port                         Initial port range.\n\
+            -f final_port                           Final port range. \n\
             -a connect | half | stealth | syn_ack   Type of attack \n\
                 TCP (connect) \n\
                 TCP (half)-opening \n\
@@ -19,7 +19,8 @@ void show_help(char *name) {
                 (syn_ack) SYN/ACK \n\
             -t attempts                             Number of attempts.\n\n\
 			-s IPv6 source                          Source.\n\
-			-d IPv6 destination                     Destination.\n\n", name);
+			-d IPv6 destination                     Destination.\n\
+			-n network_interface                    Network Interface.\n\n", name);
     exit(-1) ;
 }
 

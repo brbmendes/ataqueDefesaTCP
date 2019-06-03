@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     int opt ;
 
     /*  Variables to store options arguments. */
-    char *start_port=NULL, *end_port=NULL, *attack=NULL, *attempts=NULL, *source=NULL, *dest=NULL ;
+    char *interface=NULL, *start_port=NULL, *end_port=NULL, *attack=NULL, *attempts=NULL, *source=NULL, *dest=NULL ;
 	int int_start_port, int_end_port, int_attempts;
     int retAlp = 1;
 	int retDig = 1;
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
     /* getopt() Returns the character of an option at each 
 	* i	teration and -1 to mark the end of the process. */
-    while( (opt = getopt(argc, argv, "hi:f:a:t:s:d:")) > 0 ) {
+    while( (opt = getopt(argc, argv, "hi:f:a:t:s:d:n:")) > 0 ) {
         switch ( opt ) {
             case 'h': /* help */
                 show_help(argv[0]) ;
@@ -72,6 +72,10 @@ int main(int argc, char **argv) {
             case 'd': /* opção -d IPv6 destination*/
                 dest = optarg ;
                 break ;
+            case 'n': /* opção -n Interface*/
+                convert_lower(optarg);
+                interface = optarg ;
+                break ;
 			default:
                 //fprintf(stderr, "Invalid dsdsd: `%c'\n", optopt) ;
                 return -1 ;
@@ -91,14 +95,18 @@ int main(int argc, char **argv) {
 	
 	/* Mostra os dados na tela. */
     printf("\tInformations: \n\
+            Interface \t: %s\n\
             Port Range \t: %s, %s\n\
             Attack  \t: %s\n\
             Attempts \t: %s\n\
             Source \t: %s\n\
-            Destination : %s\n", start_port, end_port, attack, attempts, source, dest) ;
+            Destination : %s\n", interface, start_port, end_port, attack, attempts, source, dest) ;
 
     for(int i = 0 ; i < int_attempts ; i++){
-        int status = system("./bin/ipv6_send");
+        char* command = "./bin/ipv6_send ";
+        strncat(command, interface, sizeof(interface));
+        printf("%s\n", command);
+        int status = system(command);
     }
     
     return 0 ;
