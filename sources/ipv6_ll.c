@@ -13,7 +13,7 @@
 #include <netinet/in.h>		// IPPROTO_TCP, INET6_ADDRSTRLEN
 #include <netinet/ip.h>		// IP_MAXPACKET(which is 65535)
 #include <netinet/ip6.h>	// struct ip6_hdr
-#include <netinet/tcp.h>	// struct tcphdr
+#include <linux/tcp.h>	// struct tcphdr
 #include <arpa/inet.h>		// inet_pton() and inet_ntop()
 #include <sys/ioctl.h>		// macro ioctl is defined
 #include <bits/ioctls.h>	// defines values for argument "request" of ioctl.
@@ -29,18 +29,59 @@
 #define TCP_HDRLEN 20		// TCP header length, excludes options data
 #define INTERFACE_NAME "wlp3s0" // Interface name
 
+//Pseudo header needed for calculating the TCP header checksum
+struct pseudoTCPPacket {
+  uint32_t srcAddr;
+  uint32_t dstAddr;
+  uint8_t zero;
+  uint8_t protocol;
+  uint16_t TCP_len;
+};
+
+//Calculate the TCP header checksum of a string (as specified in rfc793)
+//Function from http://www.binarytides.com/raw-sockets-c-code-on-linux/
+unsigned short csum(unsigned short *ptr,int nbytes) {
+  long sum;
+  unsigned short oddbyte;
+  short answer;
+
+  //Debug info
+  //hexdump((unsigned char *) ptr, nbytes);
+  //printf("csum nbytes: %d\n", nbytes);
+  //printf("csum ptr address: %p\n", ptr);
+
+  sum=0;
+  while(nbytes>1) {
+    sum+=*ptr++;
+    nbytes-=2;
+  }
+  if(nbytes==1) {
+    oddbyte=0;
+    *((u_char*)&oddbyte)=*(u_char*)ptr;
+    sum+=oddbyte;
+  }
+
+  sum = (sum>>16)+(sum & 0xffff);
+  sum = sum + (sum>>16);
+  answer=(short)~sum;
+
+  return(answer);
+}
+
+
 int main(int argc, char **argv)
 {
 	int i, status, frame_length, sd, bytes, tcp_flags[8];
 	uint8_t src_mac[6], dst_mac[6], ether_frame[1518];
 	char interface[40], target[INET6_ADDRSTRLEN], src_ip[INET6_ADDRSTRLEN], dst_ip[INET6_ADDRSTRLEN];
 	struct ip6_hdr iphdr;
-	struct tcphdr tcphdr;
+	struct tcphdr *tcpHdr;
 	struct addrinfo hints, *res;
 	struct sockaddr_in6 *ipv6;
 	struct sockaddr_ll device;
 	struct ifreq ifr;
 	void *tmp;
+	char *data;
 
 	// Interface to send packet through.
 	if (argc > 1)
@@ -140,6 +181,62 @@ int main(int argc, char **argv)
 	}
 
 	// TCP header
+	//Setup
+	char *srcIP = "fe80::fab1:56ff:fefb:df9e";
+	char *dstIP = "fe80::5e26:aff:fe6e:aa88";
+	int dstPort = 30000;
+	int srcPort = 30001;
+
+	//Pseudo TCP header to calculate the TCP header's checksum
+	struct pseudoTCPPacket pTCPPacket;
+
+	//Pseudo TCP Header + TCP Header + data
+	char *pseudo_packet;
+
+
+	//Populate tcpHdr
+	tcpHdr->source = htons(srcPort); //16 bit in nbp format of source port
+	tcpHdr->dest = htons(dstPort); //16 bit in nbp format of destination port
+	tcpHdr->seq = 0x0; //32 bit sequence number, initially set to zero
+	tcpHdr->ack_seq = 0x0; //32 bit ack sequence number, depends whether ACK is set or not
+	tcpHdr->doff = 5; //4 bits: 5 x 32-bit words on tcp header
+	tcpHdr->res1 = 0; //4 bits: Not used
+	tcpHdr->cwr = 0; //Congestion control mechanism
+	tcpHdr->ece = 0; //Congestion control mechanism
+	tcpHdr->urg = 0; //Urgent flag
+	tcpHdr->ack = 0; //Acknownledge
+	tcpHdr->psh = 0; //Push data immediately
+	tcpHdr->rst = 0; //RST flag
+	tcpHdr->syn = 1; //SYN flag
+	tcpHdr->fin = 0; //Terminates the connection
+	tcpHdr->window = htons(155);//0xFFFF; //16 bit max number of databytes 
+	tcpHdr->check = 0; //16 bit check sum. Can't calculate at this point
+	tcpHdr->urg_ptr = 0; //16 bit indicate the urgent data. Only if URG flag is set
+
+	//Now we can calculate the checksum for the TCP header
+	pTCPPacket.srcAddr = inet_addr(srcIP); //32 bit format of source address
+	pTCPPacket.dstAddr = inet_addr(dstIP); //32 bit format of source address
+	pTCPPacket.zero = 0; //8 bit always zero
+	pTCPPacket.protocol = IPPROTO_TCP; //8 bit TCP protocol
+	pTCPPacket.TCP_len = htons(sizeof(struct tcphdr) + strlen(data)); // 16 bit length of TCP header
+
+	//Populate the pseudo packet
+	pseudo_packet = (char *) malloc((int) (sizeof(struct pseudoTCPPacket) + sizeof(struct tcphdr) + strlen(data)));
+	memset(pseudo_packet, 0, sizeof(struct pseudoTCPPacket) + sizeof(struct tcphdr) + strlen(data));
+
+	//Copy pseudo header
+	memcpy(pseudo_packet, (char *) &pTCPPacket, sizeof(struct pseudoTCPPacket));
+
+	tcpHdr->check = 0;
+
+	//Copy tcp header + data to fake TCP header for checksum
+	memcpy(pseudo_packet + sizeof(struct pseudoTCPPacket), tcpHdr, sizeof(struct tcphdr) + strlen(data));
+
+	//Set the TCP header's check field
+	tcpHdr->check = (csum((unsigned short *) pseudo_packet, (int) (sizeof(struct pseudoTCPPacket) + 
+        sizeof(struct tcphdr) +  strlen(data))));
+
+	printf("TCP Checksum: %d\n", (int) tcpHdr->check);
 
 
 	// Fill out ethernet frame header.
@@ -167,6 +264,8 @@ int main(int argc, char **argv)
 	if ((bytes = sendto(sd, ether_frame, frame_length, 0,(struct sockaddr *) &device, sizeof(device))) <= 0) {
 		perror("sendto() failed");
 		exit(EXIT_FAILURE);
+	} else {
+		printf("Success! Sent %d bytes.\n", bytes);
 	}
 
 	// Close socket descriptor.
