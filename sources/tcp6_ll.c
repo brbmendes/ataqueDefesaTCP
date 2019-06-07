@@ -123,10 +123,11 @@ main (int argc, char **argv)
   dst_mac[5] = 0xff;
 
   // Source IPv6 address: you need to fill this out
-  strcpy (src_ip, "2001:db8::214:51ff:fe2f:1556");
+  strcpy (src_ip, "::1");
 
   // Destination URL or IPv6 address: you need to fill this out
-  strcpy (target, "ipv6.google.com");
+  //strcpy (target, "ipv6.google.com");
+  strcpy (dst_ip, "::1");
 
   // Fill out hints for getaddrinfo().
   memset (&hints, 0, sizeof (struct addrinfo));
@@ -134,19 +135,19 @@ main (int argc, char **argv)
   hints.ai_socktype = SOCK_RAW;
   hints.ai_flags = hints.ai_flags | AI_CANONNAME;
 
-  // Resolve target using getaddrinfo().
-  if ((status = getaddrinfo (target, NULL, &hints, &res)) != 0) {
-    fprintf (stderr, "getaddrinfo() failed: %s\n", gai_strerror (status));
-    exit (EXIT_FAILURE);
-  }
+  //// Resolve target using getaddrinfo().
+  //if ((status = getaddrinfo (target, NULL, &hints, &res)) != 0) {
+  //  fprintf (stderr, "getaddrinfo() failed: %s\n", gai_strerror (status));
+  //  exit (EXIT_FAILURE);
+  //}
   ipv6 = (struct sockaddr_in6 *) res->ai_addr;
   tmp = &(ipv6->sin6_addr);
-  if (inet_ntop (AF_INET6, tmp, dst_ip, INET6_ADDRSTRLEN) == NULL) {
-    status = errno;
-    fprintf (stderr, "inet_ntop() failed.\nError message: %s", strerror (status));
-    exit (EXIT_FAILURE);
-  }
-  freeaddrinfo (res);
+  //if (inet_ntop (AF_INET6, tmp, dst_ip, INET6_ADDRSTRLEN) == NULL) {
+  //  status = errno;
+  //  fprintf (stderr, "inet_ntop() failed.\nError message: %s", strerror (status));
+  //  exit (EXIT_FAILURE);
+  //}
+  //freeaddrinfo (res);
 
   // Fill out sockaddr_ll.
   device.sll_family = AF_PACKET;
@@ -185,7 +186,7 @@ main (int argc, char **argv)
   tcphdr.th_sport = htons (60);
 
   // Destination port number (16 bits)
-  tcphdr.th_dport = htons (80);
+  tcphdr.th_dport = htons (22);
 
   // Sequence number (32 bits)
   tcphdr.th_seq = htonl (0);
@@ -281,7 +282,7 @@ main (int argc, char **argv)
   free (dst_mac);
   free (ether_frame);
   free (interface);
-  free (target);
+  //free (target);
   free (src_ip);
   free (dst_ip);
   free (tcp_flags);
