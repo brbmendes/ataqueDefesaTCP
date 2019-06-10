@@ -1,19 +1,3 @@
-/*  Copyright (C) 2011-2015  P.D. Buchan (pdbuchan@yahoo.com)
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 // Send an IPv6 TCP packet via raw socket at the link layer (ethernet frame).
 // Need to have destination MAC address.
 // Values set for SYN packet, no TCP options data.
@@ -78,7 +62,7 @@ main (int argc, char **argv)
   tcp_flags = allocate_intmem (8);
 
   // Interface to send packet through.
-  strcpy (interface, "enp4s0");
+  strcpy (interface, "enp2s0");
 
   // Submit request for a socket descriptor to look up interface.
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
@@ -127,7 +111,7 @@ main (int argc, char **argv)
 
   // Destination URL or IPv6 address: you need to fill this out
   //strcpy (target, "ipv6.google.com");
-  strcpy (dst_ip, "::1");
+  strcpy (dst_ip, "fe80::23d8:371d:a994:2c6c");
 
   // Fill out hints for getaddrinfo().
   memset (&hints, 0, sizeof (struct addrinfo));
