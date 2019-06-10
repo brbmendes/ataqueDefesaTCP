@@ -330,7 +330,7 @@ main (int argc, char **argv)
 		  for (i=0; i<8; i++) {
 			tcphdr.th_flags += (tcp_flags[i] << i);
 		  }
-        
+        tcphdr.th_sum = tcp6_checksum (iphdr, tcphdr); //CORREÇÃO CHECKSUM
       memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
         
         if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {

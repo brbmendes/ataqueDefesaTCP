@@ -22,7 +22,7 @@
 #include <linux/if_ether.h>   // ETH_P_IP = 0x0800, ETH_P_IPV6 = 0x86DD
 #include <linux/if_packet.h>  // struct sockaddr_ll (see man 7 packet)
 #include <net/ethernet.h>
-
+#include <time.h>
 #include <errno.h>            // errno, perror()
 
 // Define some constants.
@@ -41,7 +41,7 @@ int
 main (int argc, char **argv)
 {
   int i, status, frame_length, sd, bytes, *tcp_flags;
-  char *interface, *target, *src_ip, *dst_ip;//, *port, *paramInterface, *paramSrc_ip, *paramDst_ip;
+  char *interface, *target, *src_ip, *dst_ip;
   struct ip6_hdr iphdr;
   struct tcphdr tcphdr;
   uint8_t *src_mac, *dst_mac, *ether_frame;
@@ -50,29 +50,6 @@ main (int argc, char **argv)
   struct sockaddr_ll device;
   struct ifreq ifr;
   void *tmp;
-
-  // port = allocate_strmem (INET6_ADDRSTRLEN);
-  // paramInterface = allocate_strmem (INET6_ADDRSTRLEN);
-  // paramSrc_ip = allocate_strmem (500);
-  // paramDst_ip = allocate_strmem (500);
-  
-  // printf("%s\n",argv[1]);
-  // printf("%s\n",argv[2]);
-  // printf("%s\n",argv[3]);
-  // printf("%s\n",argv[4]);
-
-  // strcpy(port, argv[1]);
-  // strcpy(paramInterface, argv[2]);
-  // strcpy(paramSrc_ip, argv[3]);
-  // strcpy(paramDst_ip, argv[4]);
-
-  // printf("%s\n",port);
-  // printf("%s\n",paramInterface);
-  // printf("%s\n",paramSrc_ip);
-  // printf("%s\n",paramDst_ip);
-  // // paramInterface = argv[2];
-  // // paramSrc_ip = argv[3];
-  // // paramDst_ip = argv[4];
 
   // Allocate memory for various arrays.
   src_mac = allocate_ustrmem (6);
@@ -268,16 +245,22 @@ main (int argc, char **argv)
     perror ("socket() failed ");
     exit (EXIT_FAILURE);
   }
+  
+  int count = 0;
+  clock_t start = clock();
+  char current_ipv6[500] = "";
 
-   if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
-    perror ("sendto() failed");
-    exit (EXIT_FAILURE);
-  }
+	
   while ((bytes = read(sd, ether_frame, frame_length)) > 0){
-
+		
+		if (start - clock() > 1000) {
+			memset (current_ipv6, 0, 500 * sizeof (char));
+			count = 0;
+		}
+		
       int started = 0;
       char src_ipv6[500] = "";
-      for (i = 22; i < 37; i+=2){
+      for (i = 22; i < 37; i+=2) {
         if(started == 0){
           started = 1;
         } else {
@@ -315,32 +298,21 @@ main (int argc, char **argv)
     long b = strtol("60", NULL, 10);
     long d = strtol(argv[1], NULL, 10);
     
-    if(strcmp(dst_ip,src_ipv6) == 0 
-      && strcmp(src_ip,dst_iv6) == 0
-      && a == b
-      && c == d
-      && ether_frame[57] & 0x12){
-        printf("Enviar ack \n");
-        
-        tcp_flags[1] = 0;
-        tcp_flags[2] = 0;
-        tcp_flags[4] = 1;
-
-		  tcphdr.th_flags = 0;
-		  for (i=0; i<8; i++) {
-			tcphdr.th_flags += (tcp_flags[i] << i);
-		  }
-        tcphdr.th_sum = tcp6_checksum (iphdr, tcphdr); //CORREÇÃO CHECKSUM
-      memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
-        
-        if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
-			perror ("sendto() failed");
-			exit (EXIT_FAILURE);
-		  }
-      break;
-        
+    if(strcmp(dst_iv6,dst_ip) == 0
+		&& (strcmp(current_ipv6,"") == 0
+			|| strcmp(current_ipv6,src_ip) == 0)) {
+		strcpy(current_ipv6,src_ip);
+		
+		count++;
+		
+		if (count == 10) {
+				printf("Ataque!! \n");
+		}        
       }
+
     }
+  
+  
   
   // packet_size = recvfrom(sock , buffer , 65536 , 0 , NULL, NULL);
 
