@@ -334,15 +334,18 @@ main (int argc, char **argv)
       sprintf(dst_port, "%02x%02x", ether_frame[56], ether_frame[57]);
       
       // FIM TESTANDO PORTA DE ORIGEM E DESTINO
-		printf("bla bla %s\n",src_ipv6);
+		/********** TESTE (REMOVER) ****************/
+		
+        /********** TESTE (REMOVER) ****************/
+		
       if(strcmp(dst_ip,src_ipv6) == 0 
 		&& strcmp(src_ip,dst_iv6) == 0
 		&& strcmp(dst_port, "60") == 0
 		&& strcmp(src_port, argv[1]) == 0){
         printf("Enviar ack \n");// ele deve enviar ack;
         printf("Porta %d:\n", strtol(dst_port, NULL, 16));
-        
-        tcp_flags[4] = 1;
+        tcp_flags[1] = 0;
+        tcp_flags[2] = 1;
 
 		  tcphdr.th_flags = 0;
 		  for (i=0; i<8; i++) {
@@ -355,7 +358,6 @@ main (int argc, char **argv)
 			perror ("sendto() failed");
 			exit (EXIT_FAILURE);
 		  }
-        
         
       }
 
