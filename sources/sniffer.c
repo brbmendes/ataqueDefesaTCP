@@ -33,8 +33,7 @@ char *allocate_strmem (int);
 uint8_t *allocate_ustrmem (int);
 int *allocate_intmem (int);
 
-int
-main (int argc, char **argv)
+int main (int argc, char **argv)
 {
   int i, status, frame_length, sd, bytes, *tcp_flags;
   char *interface, *target, *src_ip, *dst_ip;
@@ -60,14 +59,14 @@ main (int argc, char **argv)
   strcpy (interface, argv[1]);
 
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
-    perror ("socket() failed to get socket descriptor for using ioctl() ");
+    perror ("socket() falho ao buscar descritor do socket usando ioctl() ");
     exit (EXIT_FAILURE);
   }
 	
   memset (&ifr, 0, sizeof (ifr));
   snprintf (ifr.ifr_name, sizeof (ifr.ifr_name), "%s", interface);
   if (ioctl (sd, SIOCGIFHWADDR, &ifr) < 0) {
-    perror ("ioctl() failed to get source MAC address ");
+    perror ("ioctl() falhou buscando endereço MAC ");
     return (EXIT_FAILURE);
   }
   close (sd);
@@ -75,7 +74,7 @@ main (int argc, char **argv)
   memcpy (src_mac, ifr.ifr_hwaddr.sa_data, 6 * sizeof (uint8_t));
 
 
-  printf ("MAC address for interface %s is ", interface);
+  printf ("Endereço MAC para interface %s é ", interface);
   for (i=0; i<5; i++) {
     printf ("%02x:", src_mac[i]);
   }
@@ -83,10 +82,10 @@ main (int argc, char **argv)
 
   memset (&device, 0, sizeof (device));
   if ((device.sll_ifindex = if_nametoindex (interface)) == 0) {
-    perror ("if_nametoindex() failed to obtain interface index ");
+    perror ("if_nametoindex() falhou em obter índice da interface ");
     exit (EXIT_FAILURE);
   }
-  printf ("Index for interface %s is %i\n", interface, device.sll_ifindex);
+  printf ("Índice para interface %s é %i\n", interface, device.sll_ifindex);
 
   strcpy (dst_ip, argv[2]);
     
@@ -110,7 +109,7 @@ main (int argc, char **argv)
 
 
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
-    perror ("socket() failed ");
+    perror ("socket() falhou! ");
     exit (EXIT_FAILURE);
   }
   
@@ -122,12 +121,14 @@ main (int argc, char **argv)
 
   while ((bytes = read(sd, ether_frame, frame_length)) > 0){
 		
-		if (start - clock() > 1000) {
+		/*** NOVA SEÇÃO 1**/
+		if (clock() - start > 5000) {
 			memset (current_ipv6, 0, 500 * sizeof (char));
 			count = 0;
 			initial_code = 0;
 			other_code = 0;
 		}
+		/*******/
 
 		
       int started = 0;
@@ -191,6 +192,7 @@ main (int argc, char **argv)
 		}
 		
 		if (count == strtol(argv[3], NULL, 10)) {
+		
 			if (initial_code == 0x02) {
 				printf("%02x\n", other_code);
 				if (other_code != 0) {
@@ -203,6 +205,15 @@ main (int argc, char **argv)
 			} else if (initial_code == 0x12) {
 				printf("Ataque SYN/ACK: %s\n", src_ipv6);
 			}	
+		
+			/** NOVA SEÇÃO 2 ***/
+			
+			memset (current_ipv6, 0, 500 * sizeof (char));
+			count = 0;
+			initial_code = 0;
+			other_code = 0;
+			
+			/**********/
 		}        
       }
 
@@ -222,8 +233,7 @@ main (int argc, char **argv)
   return (EXIT_SUCCESS);
 }
 
-uint16_t
-checksum (uint16_t *addr, int len)
+uint16_t checksum (uint16_t *addr, int len)
 {
   int count = len;
   register uint32_t sum = 0;
