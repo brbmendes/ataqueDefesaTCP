@@ -62,7 +62,7 @@ main (int argc, char **argv)
   tcp_flags = allocate_intmem (8);
 
   // Interface to send packet through.
-  strcpy (interface, "enp2s0");
+  strcpy (interface, "enp0s3");
 
   // Submit request for a socket descriptor to look up interface.
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
@@ -170,7 +170,10 @@ main (int argc, char **argv)
   tcphdr.th_sport = htons (60);
 
   // Destination port number (16 bits)
-  tcphdr.th_dport = htons (22);
+  tcphdr.th_dport = htons (atoi(argv[1]));
+  printf("%s\n",argv[0]);
+  
+
 
   // Sequence number (32 bits)
   tcphdr.th_seq = htonl (0);

@@ -104,13 +104,23 @@ int main(int argc, char **argv) {
             Source \t: %s\n\
             Destination : %s\n", interface, start_port, end_port, attack, attempts, source, dest) ;
 
-    for(int i = 0 ; i < int_attempts ; i++){
-        char* tmp = "./bin/ipv6_send ";
-        char command[SIZE];
-        strcpy(command, tmp);
-        strcat(command, interface);
-        int status = system(command);
-    }
+	for (int i = int_start_port; i <= int_end_port; i++) {		 
+		for(int j = 0 ; j < int_attempts ; j++){
+			char* tmp = "./bin/tcp_send ";
+			char command[SIZE];
+			strcpy(command, tmp);
+			char port[5];
+			//itoa(i, port, 10);
+			printf("%d\n", i);
+			sprintf(port, "%d", i);
+			
+			strcat(command, port);
+			strcat(command, " ");
+			strcat(command, interface);
+			int status = system(command);
+			printf("%s\n", command);
+		}
+	}
     
     return 0 ;
     
