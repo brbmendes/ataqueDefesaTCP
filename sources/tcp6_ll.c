@@ -341,6 +341,22 @@ main (int argc, char **argv)
 		&& strcmp(src_port, argv[1]) == 0){
         printf("Enviar ack \n");// ele deve enviar ack;
         printf("Porta %d:\n", strtol(dst_port, NULL, 16));
+        
+        tcp_flags[4] = 1;
+
+		  tcphdr.th_flags = 0;
+		  for (i=0; i<8; i++) {
+			tcphdr.th_flags += (tcp_flags[i] << i);
+		  }
+        
+  memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
+        
+        if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
+			perror ("sendto() failed");
+			exit (EXIT_FAILURE);
+		  }
+        
+        
       }
 
     }
