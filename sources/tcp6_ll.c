@@ -327,20 +327,20 @@ main (int argc, char **argv)
         strcat(dst_iv6,tmp3);
       }
       // FIM TESTANDO IP DE ORIGEM E DESTINO
-      char dst_port[4];
-      sprintf(dst_port, "%02x%02x", ether_frame[54], ether_frame[55]);
+      char src_port[4];
+      sprintf(src_port, "%02x%02x", ether_frame[54], ether_frame[55]);
       
-      // TESTANDO PORTA DE ORIGEM E DESTINO
+      char dst_port[4];
+      sprintf(dst_port, "%02x%02x", ether_frame[56], ether_frame[57]);
       
       // FIM TESTANDO PORTA DE ORIGEM E DESTINO
-
-      // TESTANDO PROTOCOLO
-      // printf(" protocol: %04x", (ether_frame[12] << 8) | ether_frame[13]);
-      // FIM TESTANDO PROTOCOLO
-
-      if(strcmp(dst_ip,src_ipv6) == 0 && strcmp(src_ip,dst_iv6) == 0){
+		printf("bla bla %s\n",src_ipv6);
+      if(strcmp(dst_ip,src_ipv6) == 0 
+		&& strcmp(src_ip,dst_iv6) == 0
+		&& strcmp(dst_port, "60") == 0
+		&& strcmp(src_port, argv[1]) == 0){
         printf("Enviar ack \n");// ele deve enviar ack;
-        printf("Porta %s:\n", dst_port);
+        printf("Porta %d:\n", strtol(dst_port, NULL, 16));
       }
 
     }
