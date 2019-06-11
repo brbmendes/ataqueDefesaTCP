@@ -41,7 +41,7 @@ int
 main (int argc, char **argv)
 {
   int i, status, frame_length, sd, bytes, *tcp_flags;
-  char *interface, *target, *src_ip, *dst_ip, *port, *paramInterface, *paramSrc_ip, *paramDst_ip;
+  char *interface, *target, *src_ip, *dst_ip;//, *port, *paramInterface, *paramSrc_ip, *paramDst_ip;
   struct ip6_hdr iphdr;
   struct tcphdr tcphdr;
   uint8_t *src_mac, *dst_mac, *ether_frame;
@@ -51,17 +51,28 @@ main (int argc, char **argv)
   struct ifreq ifr;
   void *tmp;
 
+  // port = allocate_strmem (INET6_ADDRSTRLEN);
+  // paramInterface = allocate_strmem (INET6_ADDRSTRLEN);
+  // paramSrc_ip = allocate_strmem (500);
+  // paramDst_ip = allocate_strmem (500);
+  
+  // printf("%s\n",argv[1]);
+  // printf("%s\n",argv[2]);
+  // printf("%s\n",argv[3]);
+  // printf("%s\n",argv[4]);
 
-  printf("%s\n",argv[1]);
-  printf("%s\n",argv[2]);
-  printf("%s\n",argv[3]);
-  printf("%s\n",argv[4]);
+  // strcpy(port, argv[1]);
+  // strcpy(paramInterface, argv[2]);
+  // strcpy(paramSrc_ip, argv[3]);
+  // strcpy(paramDst_ip, argv[4]);
 
-  port = argv[1];
-  paramInterface = argv[2];
-  paramSrc_ip = argv[3];
-  paramDst_ip = argv[4];
-
+  // printf("%s\n",port);
+  // printf("%s\n",paramInterface);
+  // printf("%s\n",paramSrc_ip);
+  // printf("%s\n",paramDst_ip);
+  // // paramInterface = argv[2];
+  // // paramSrc_ip = argv[3];
+  // // paramDst_ip = argv[4];
 
   // Allocate memory for various arrays.
   src_mac = allocate_ustrmem (6);
@@ -73,8 +84,9 @@ main (int argc, char **argv)
   dst_ip = allocate_strmem (INET6_ADDRSTRLEN);
   tcp_flags = allocate_intmem (8);
 
+
   // Interface to send packet through.
-  strcpy (interface, paramInterface);
+  strcpy (interface, argv[2]);
 
   // Submit request for a socket descriptor to look up interface.
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
@@ -93,6 +105,7 @@ main (int argc, char **argv)
 
   // Copy source MAC address.
   memcpy (src_mac, ifr.ifr_hwaddr.sa_data, 6 * sizeof (uint8_t));
+
 
   // Report source MAC address to stdout.
   printf ("MAC address for interface %s is ", interface);
@@ -119,11 +132,11 @@ main (int argc, char **argv)
   dst_mac[5] = 0xff;
 
   // Source IPv6 address: you need to fill this out
-  strcpy (src_ip, paramSrc_ip);
+  strcpy (src_ip, argv[3]);
   
   // Destination URL or IPv6 address: you need to fill this out
   //strcpy (target, "ipv6.google.com");
-  strcpy (dst_ip, paramDst_ip);
+  strcpy (dst_ip, argv[4]);
   
   
 
@@ -273,10 +286,46 @@ main (int argc, char **argv)
   }
 
   // Send ethernet frame to socket.
-  if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
+   if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
     perror ("sendto() failed");
     exit (EXIT_FAILURE);
   }
+  while ((bytes = read(sd, ether_frame, frame_length)) > 0){
+      /* Exibe tamanho do pacote recebido */
+      printf("\n%d:\t", bytes);
+      printf("%s\n", dst_ip);
+      //if (memcmp(&ether_frame[22], dst_ip, 16) == 0) {
+        /* exibe os primeiros 14 bytes,  ou seja,
+      MAC Address Destino, Mac Address Origem e type do cabeçalho Ethernet */
+      printf(" source: ");
+      int started = 0;
+      char start[500];
+      int start_index;
+      for (i = 22; i < 37; i+=2){
+        if(started == 0){
+        } else {
+          strcat(start,":");
+          started = 1;
+        }
+        // strcat(start, itoa(ether_frame[i]));
+        // strcat(start, itoa(ether_frame[i+1]));
+      }
+      printf("Success: %s", start);
+      started = 0;
+      
+      printf(" target: ");
+      for (i = 38; i < 54; i+=2)
+        printf("02x%02x:", ether_frame[i], ether_frame[i+1]);
+      printf(" protocol: %04x", (ether_frame[12] << 8) | ether_frame[13]);
+      //}
+
+      
+      
+    }
+  
+  // packet_size = recvfrom(sock , buffer , 65536 , 0 , NULL, NULL);
+
+  
 
   // Close socket descriptor.
   close (sd);
