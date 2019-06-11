@@ -12,7 +12,7 @@
 #define TCP_HALF_OPENING "TCP Half-Opening"
 #define STEALTH_SCAN "Stealth Scan or TCP FIN"
 #define SYN_ACK "SYN/ACK"
-#define SIZE 500
+#define SIZE 2000
 
 
 int main(int argc, char **argv) {
@@ -117,8 +117,11 @@ int main(int argc, char **argv) {
 			strcat(command, port);
 			strcat(command, " ");
 			strcat(command, interface);
+            strcat(command, " ");
+			strcat(command, source);
+            strcat(command, " ");
+			strcat(command, dest);
 			int status = system(command);
-			printf("%s\n", command);
 		}
 	}
     

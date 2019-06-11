@@ -41,7 +41,7 @@ int
 main (int argc, char **argv)
 {
   int i, status, frame_length, sd, bytes, *tcp_flags;
-  char *interface, *target, *src_ip, *dst_ip;
+  char *interface, *target, *src_ip, *dst_ip, *port, *paramInterface, *paramSrc_ip, *paramDst_ip;
   struct ip6_hdr iphdr;
   struct tcphdr tcphdr;
   uint8_t *src_mac, *dst_mac, *ether_frame;
@@ -50,6 +50,18 @@ main (int argc, char **argv)
   struct sockaddr_ll device;
   struct ifreq ifr;
   void *tmp;
+
+
+  printf("%s\n",argv[1]);
+  printf("%s\n",argv[2]);
+  printf("%s\n",argv[3]);
+  printf("%s\n",argv[4]);
+
+  port = argv[1];
+  paramInterface = argv[2];
+  paramSrc_ip = argv[3];
+  paramDst_ip = argv[4];
+
 
   // Allocate memory for various arrays.
   src_mac = allocate_ustrmem (6);
@@ -62,7 +74,7 @@ main (int argc, char **argv)
   tcp_flags = allocate_intmem (8);
 
   // Interface to send packet through.
-  strcpy (interface, "enp0s3");
+  strcpy (interface, paramInterface);
 
   // Submit request for a socket descriptor to look up interface.
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
@@ -107,11 +119,13 @@ main (int argc, char **argv)
   dst_mac[5] = 0xff;
 
   // Source IPv6 address: you need to fill this out
-  strcpy (src_ip, "::1");
-
+  strcpy (src_ip, paramSrc_ip);
+  
   // Destination URL or IPv6 address: you need to fill this out
   //strcpy (target, "ipv6.google.com");
-  strcpy (dst_ip, "fe80::23d8:371d:a994:2c6c");
+  strcpy (dst_ip, paramDst_ip);
+  
+  
 
   // Fill out hints for getaddrinfo().
   memset (&hints, 0, sizeof (struct addrinfo));
@@ -126,6 +140,7 @@ main (int argc, char **argv)
   //}
   ipv6 = (struct sockaddr_in6 *) res->ai_addr;
   tmp = &(ipv6->sin6_addr);
+  
   //if (inet_ntop (AF_INET6, tmp, dst_ip, INET6_ADDRSTRLEN) == NULL) {
   //  status = errno;
   //  fprintf (stderr, "inet_ntop() failed.\nError message: %s", strerror (status));
@@ -157,7 +172,7 @@ main (int argc, char **argv)
     fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
     exit (EXIT_FAILURE);
   }
-
+  
   // Destination IPv6 address (128 bits)
   if ((status = inet_pton (AF_INET6, dst_ip, &(iphdr.ip6_dst))) != 1) {
     fprintf (stderr, "inet_pton() failed.\nError message: %s", strerror (status));
@@ -165,6 +180,7 @@ main (int argc, char **argv)
   }
 
   // TCP header
+  
 
   // Source port number (16 bits)
   tcphdr.th_sport = htons (60);
@@ -172,6 +188,7 @@ main (int argc, char **argv)
   // Destination port number (16 bits)
   tcphdr.th_dport = htons (atoi(argv[1]));
   printf("%s\n",argv[0]);
+  
   
 
 
