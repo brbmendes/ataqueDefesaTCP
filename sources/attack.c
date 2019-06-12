@@ -106,22 +106,82 @@ int main(int argc, char **argv) {
 
 	for (int i = int_start_port; i <= int_end_port; i++) {		 
 		for(int j = 0 ; j < int_attempts ; j++){
-			char* tmp = "./bin/tcp_send ";
-			char command[SIZE];
-			strcpy(command, tmp);
-			char port[5];
-			//itoa(i, port, 10);
-			printf("%d\n", i);
-			sprintf(port, "%d", i);
+            if(strcmp(attack,"connect") == 0){
+                char* tmp = "./bin/tcp_connect ";
+                char command[SIZE];
+                strcpy(command, tmp);
+                char port[5];
+                //itoa(i, port, 10);
+                printf("%d\n", i);
+                sprintf(port, "%d", i);
+                
+                strcat(command, port);
+                strcat(command, " ");
+                strcat(command, interface);
+                strcat(command, " ");
+                strcat(command, source);
+                strcat(command, " ");
+                strcat(command, dest);
+                printf("Command::> ", command);
+                int status = system(command);
+            } else if(strcmp(attack,"half") == 0){
+                char* tmp = "./bin/tcp_half_opening ";
+                char command[SIZE];
+                strcpy(command, tmp);
+                char port[5];
+                //itoa(i, port, 10);
+                printf("%d\n", i);
+                sprintf(port, "%d", i);
+                
+                strcat(command, port);
+                strcat(command, " ");
+                strcat(command, interface);
+                strcat(command, " ");
+                strcat(command, source);
+                strcat(command, " ");
+                strcat(command, dest);
+                printf("Command::> ", command);
+                int status = system(command);
+            } else if(strcmp(attack,"stealth") == 0){
+                char* tmp = "./bin/stealth_scan_fin ";
+                char command[SIZE];
+                strcpy(command, tmp);
+                char port[5];
+                //itoa(i, port, 10);
+                printf("%d\n", i);
+                sprintf(port, "%d", i);
+                
+                strcat(command, port);
+                strcat(command, " ");
+                strcat(command, interface);
+                strcat(command, " ");
+                strcat(command, source);
+                strcat(command, " ");
+                strcat(command, dest);
+                printf("Command::> ", command);
+                int status = system(command);
+            } else {
+                char* tmp = "./bin/syn_ack ";
+                char command[SIZE];
+                strcpy(command, tmp);
+                char port[5];
+                //itoa(i, port, 10);
+                printf("%d\n", i);
+                sprintf(port, "%d", i);
+                
+                strcat(command, port);
+                strcat(command, " ");
+                strcat(command, interface);
+                strcat(command, " ");
+                strcat(command, source);
+                strcat(command, " ");
+                strcat(command, dest);
+                printf("Command::> ", command);
+                int status = system(command);
+            }
+
+
 			
-			strcat(command, port);
-			strcat(command, " ");
-			strcat(command, interface);
-            strcat(command, " ");
-			strcat(command, source);
-            strcat(command, " ");
-			strcat(command, dest);
-			int status = system(command);
 		}
 	}
     
