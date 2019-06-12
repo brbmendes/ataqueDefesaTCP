@@ -291,36 +291,58 @@ main (int argc, char **argv)
     exit (EXIT_FAILURE);
   }
   while ((bytes = read(sd, ether_frame, frame_length)) > 0){
-      /* Exibe tamanho do pacote recebido */
-      printf("\n%d:\t", bytes);
-      printf("%s\n", dst_ip);
-      //if (memcmp(&ether_frame[22], dst_ip, 16) == 0) {
-        /* exibe os primeiros 14 bytes,  ou seja,
-      MAC Address Destino, Mac Address Origem e type do cabeçalho Ethernet */
-      printf(" source: ");
+
+      printf("\n");
+      printf("Source IP:\t%s\n", src_ip);
+      printf("Destination IP:\t%s\n", dst_ip);
+
+      // TESTANDO IP DE ORIGEM E DESTINO
       int started = 0;
-      char start[500];
-      int start_index;
+      char src_ipv6[500] = "";
       for (i = 22; i < 37; i+=2){
         if(started == 0){
-        } else {
-          strcat(start,":");
           started = 1;
+        } else {
+          strcat(src_ipv6,":");
         }
-        // strcat(start, itoa(ether_frame[i]));
-        // strcat(start, itoa(ether_frame[i+1]));
+        char tmp2[2];
+        sprintf(tmp2, "%02x", ether_frame[i]);
+        strcat(src_ipv6,tmp2);
+        sprintf(tmp2, "%02x", ether_frame[i +1]);
+        strcat(src_ipv6,tmp2);
       }
-      printf("Success: %s", start);
       started = 0;
-      
-      printf(" target: ");
-      for (i = 38; i < 54; i+=2)
-        printf("02x%02x:", ether_frame[i], ether_frame[i+1]);
-      printf(" protocol: %04x", (ether_frame[12] << 8) | ether_frame[13]);
-      //}
 
+      char dst_iv6[500] = "";
+      for (i = 38; i < 54; i+=2){
+        if(started == 0){
+          started = 1;
+        } else {
+          strcat(dst_iv6,":");
+        }
+        char tmp3[2];
+        sprintf(tmp3, "%02x", ether_frame[i]);
+        strcat(dst_iv6,tmp3);
+        sprintf(tmp3, "%02x", ether_frame[i +1]);
+        strcat(dst_iv6,tmp3);
+      }
+      // FIM TESTANDO IP DE ORIGEM E DESTINO
+      char dst_port[4];
+      sprintf(dst_port, "%02x%02x", ether_frame[54], ether_frame[55]);
       
+      // TESTANDO PORTA DE ORIGEM E DESTINO
       
+      // FIM TESTANDO PORTA DE ORIGEM E DESTINO
+
+      // TESTANDO PROTOCOLO
+      // printf(" protocol: %04x", (ether_frame[12] << 8) | ether_frame[13]);
+      // FIM TESTANDO PROTOCOLO
+
+      if(strcmp(dst_ip,src_ipv6) == 0 && strcmp(src_ip,dst_iv6) == 0){
+        printf("Enviar ack \n");// ele deve enviar ack;
+        printf("Porta %s:\n", dst_port);
+      }
+
     }
   
   // packet_size = recvfrom(sock , buffer , 65536 , 0 , NULL, NULL);
