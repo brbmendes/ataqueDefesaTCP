@@ -248,55 +248,33 @@ main (int argc, char **argv)
     tcphdr.th_flags += (tcp_flags[i] << i);
   }
 
-  // Window size (16 bits)
   tcphdr.th_win = htons (65535);
-
-  // Urgent pointer (16 bits): 0 (only valid if URG flag is set)
   tcphdr.th_urp = htons (0);
-
-  // TCP checksum (16 bits)
   tcphdr.th_sum = tcp6_checksum (iphdr, tcphdr);
 
-  // Fill out ethernet frame header.
-
-  // Ethernet frame length = ethernet header (MAC + MAC + ethernet type) + ethernet data (IP header + TCP header)
   frame_length = 6 + 6 + 2 + IP6_HDRLEN + TCP_HDRLEN;
 
-  // Destination and Source MAC addresses
   memcpy (ether_frame, dst_mac, 6 * sizeof (uint8_t));
   memcpy (ether_frame + 6, src_mac, 6 * sizeof (uint8_t));
 
-  // Next is ethernet type code (ETH_P_IPV6 for IPv6).
-  // http://www.iana.org/assignments/ethernet-numbers
   ether_frame[12] = ETH_P_IPV6 / 256;
   ether_frame[13] = ETH_P_IPV6 % 256;
 
-  // Next is ethernet frame data (IPv6 header + TCP header).
-
-  // IPv6 header
   memcpy (ether_frame + ETH_HDRLEN, &iphdr, IP6_HDRLEN * sizeof (uint8_t));
 
-  // TCP header
   memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
 
-  // Submit request for a raw socket descriptor.
   if ((sd = socket (PF_PACKET, SOCK_RAW, htons (ETH_P_ALL))) < 0) {
     perror ("socket() failed ");
     exit (EXIT_FAILURE);
   }
 
-  // Send ethernet frame to socket.
    if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
     perror ("sendto() failed");
     exit (EXIT_FAILURE);
   }
   while ((bytes = read(sd, ether_frame, frame_length)) > 0){
 
-      printf("\n");
-      printf("Source IP:\t%s\n", src_ip);
-      printf("Destination IP:\t%s\n", dst_ip);
-
-      // TESTANDO IP DE ORIGEM E DESTINO
       int started = 0;
       char src_ipv6[500] = "";
       for (i = 22; i < 37; i+=2){
@@ -326,33 +304,34 @@ main (int argc, char **argv)
         sprintf(tmp3, "%02x", ether_frame[i +1]);
         strcat(dst_iv6,tmp3);
       }
-      // FIM TESTANDO IP DE ORIGEM E DESTINO
-      char src_port[4];
-      sprintf(src_port, "%02x%02x", ether_frame[54], ether_frame[55]);
       
+      char src_port_2[4];
+      sprintf(src_port_2, "%02x%02x", ether_frame[54], ether_frame[55]);
+      long c = strtol(src_port_2, NULL, 16);
       char dst_port[4];
       sprintf(dst_port, "%02x%02x", ether_frame[56], ether_frame[57]);
-      
-      // FIM TESTANDO PORTA DE ORIGEM E DESTINO
-		/********** TESTE (REMOVER) ****************/
-		
-        /********** TESTE (REMOVER) ****************/
-		
-      if(strcmp(dst_ip,src_ipv6) == 0 
-		&& strcmp(src_ip,dst_iv6) == 0
-		&& strcmp(dst_port, "60") == 0
-		&& strcmp(src_port, argv[1]) == 0){
-        printf("Enviar ack \n");// ele deve enviar ack;
-        printf("Porta %d:\n", strtol(dst_port, NULL, 16));
+    
+		long a = strtol(dst_port, NULL, 16);
+    long b = strtol("60", NULL, 10);
+    long d = strtol(argv[1], NULL, 10);
+    
+    if(strcmp(dst_ip,src_ipv6) == 0 
+      && strcmp(src_ip,dst_iv6) == 0
+      && a == b
+      && c == d
+      && ether_frame[57] & 0x00010010){
+        printf("Enviar ack \n");
+        
         tcp_flags[1] = 0;
-        tcp_flags[2] = 1;
+        tcp_flags[2] = 0;
+        tcp_flags[4] = 1;
 
 		  tcphdr.th_flags = 0;
 		  for (i=0; i<8; i++) {
 			tcphdr.th_flags += (tcp_flags[i] << i);
 		  }
         
-  memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
+      memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
         
         if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
 			perror ("sendto() failed");
