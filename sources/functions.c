@@ -18,9 +18,9 @@ void show_help(char *name) {
                 (stealth) scan or TCP FIN \n\
                 (syn_ack) SYN/ACK \n\
             -t attempts                             Number of attempts.\n\n\
-			-s IPv6 source                          Source.\n\
-			-d IPv6 destination                     Destination.\n\
-			-n network_interface                    Network Interface.\n\n", name);
+  	    -s IPv6 source                          Source.\n\
+	    -d IPv6 destination                     Destination.\n\
+	    -n network_interface                    Network Interface.\n\n", name);
     exit(-1) ;
 }
 
