@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
             Attack  \t: %s\n\
             Attempts \t: %s\n\
             Source \t: %s\n\
-            Destination : %s\n", interface, start_port, end_port, attack, attempts, source, dest) ;
+            Destination : %s\n\n\n", interface, start_port, end_port, attack, attempts, source, dest) ;
 
 	for (int i = int_start_port; i <= int_end_port; i++) {		 
 		for(int j = 0 ; j < int_attempts ; j++){
@@ -112,8 +112,6 @@ int main(int argc, char **argv) {
                 char command[SIZE];
                 strcpy(command, tmp);
                 char port[5];
-                //itoa(i, port, 10);
-                printf("%d\n", i);
                 sprintf(port, "%d", i);
                 
                 strcat(command, port);
@@ -129,8 +127,6 @@ int main(int argc, char **argv) {
                 char command[SIZE];
                 strcpy(command, tmp);
                 char port[5];
-                //itoa(i, port, 10);
-                printf("%d\n", i);
                 sprintf(port, "%d", i);
                 
                 strcat(command, port);
@@ -146,8 +142,7 @@ int main(int argc, char **argv) {
                 char command[SIZE];
                 strcpy(command, tmp);
                 char port[5];
-                //itoa(i, port, 10);
-                printf("%d\n", i);
+                
                 sprintf(port, "%d", i);
                 
                 strcat(command, port);
@@ -163,8 +158,7 @@ int main(int argc, char **argv) {
                 char command[SIZE];
                 strcpy(command, tmp);
                 char port[5];
-                //itoa(i, port, 10);
-                printf("%d\n", i);
+
                 sprintf(port, "%d", i);
                 
                 strcat(command, port);
