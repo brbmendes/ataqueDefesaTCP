@@ -319,12 +319,12 @@ main (int argc, char **argv)
       && strcmp(src_ip,dst_iv6) == 0
       && a == b
       && c == d
-      && ether_frame[57] & 0x00010010){
+      && ether_frame[57] & 0x12){
         printf("Enviar ack \n");
         
         tcp_flags[1] = 0;
-        tcp_flags[2] = 0;
-        tcp_flags[4] = 1;
+        tcp_flags[2] = 1;
+        tcp_flags[4] = 0;
 
 		  tcphdr.th_flags = 0;
 		  for (i=0; i<8; i++) {
@@ -337,6 +337,7 @@ main (int argc, char **argv)
 			perror ("sendto() failed");
 			exit (EXIT_FAILURE);
 		  }
+      break;
         
       }
 

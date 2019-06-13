@@ -12,6 +12,7 @@
 #define TCP_HALF_OPENING "TCP Half-Opening"
 #define STEALTH_SCAN "Stealth Scan or TCP FIN"
 #define SYN_ACK "SYN/ACK"
+
 #define SIZE 2000
 
 
@@ -106,7 +107,7 @@ int main(int argc, char **argv) {
 
 	for (int i = int_start_port; i <= int_end_port; i++) {		 
 		for(int j = 0 ; j < int_attempts ; j++){
-            if(strcmp(attack,"connect") == 0){
+            if(strcmp(attack,TCP_CONNECT) == 0){
                 char* tmp = "./bin/tcp_connect ";
                 char command[SIZE];
                 strcpy(command, tmp);
@@ -122,9 +123,8 @@ int main(int argc, char **argv) {
                 strcat(command, source);
                 strcat(command, " ");
                 strcat(command, dest);
-                printf("Command::> ", command);
                 int status = system(command);
-            } else if(strcmp(attack,"half") == 0){
+            } else if(strcmp(attack,TCP_HALF_OPENING) == 0){
                 char* tmp = "./bin/tcp_half_opening ";
                 char command[SIZE];
                 strcpy(command, tmp);
@@ -140,9 +140,8 @@ int main(int argc, char **argv) {
                 strcat(command, source);
                 strcat(command, " ");
                 strcat(command, dest);
-                printf("Command::> ", command);
                 int status = system(command);
-            } else if(strcmp(attack,"stealth") == 0){
+            } else if(strcmp(attack,STEALTH_SCAN) == 0){
                 char* tmp = "./bin/stealth_scan_fin ";
                 char command[SIZE];
                 strcpy(command, tmp);
@@ -158,7 +157,6 @@ int main(int argc, char **argv) {
                 strcat(command, source);
                 strcat(command, " ");
                 strcat(command, dest);
-                printf("Command::> ", command);
                 int status = system(command);
             } else {
                 char* tmp = "./bin/syn_ack ";
@@ -176,12 +174,8 @@ int main(int argc, char **argv) {
                 strcat(command, source);
                 strcat(command, " ");
                 strcat(command, dest);
-                printf("Command::> ", command);
                 int status = system(command);
             }
-
-
-			
 		}
 	}
     

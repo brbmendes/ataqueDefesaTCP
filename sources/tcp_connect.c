@@ -319,7 +319,7 @@ main (int argc, char **argv)
       && strcmp(src_ip,dst_iv6) == 0
       && a == b
       && c == d
-      && ether_frame[57] & 0x00010010){
+      && ether_frame[57] & 0x12){
         printf("Enviar ack \n");
         
         tcp_flags[1] = 0;
@@ -337,9 +337,9 @@ main (int argc, char **argv)
 			perror ("sendto() failed");
 			exit (EXIT_FAILURE);
 		  }
+      break;
         
       }
-
     }
   
   // packet_size = recvfrom(sock , buffer , 65536 , 0 , NULL, NULL);

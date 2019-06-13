@@ -232,7 +232,7 @@ main (int argc, char **argv)
   tcp_flags[3] = 0;
 
   // ACK flag (1 bit)
-  tcp_flags[4] = 0;
+  tcp_flags[4] = 1;
 
   // URG flag (1 bit)
   tcp_flags[5] = 0;
@@ -319,26 +319,13 @@ main (int argc, char **argv)
       && strcmp(src_ip,dst_iv6) == 0
       && a == b
       && c == d
-      && ether_frame[57] & 0x00010010){
-        printf("Enviar ack \n");
-        
-        tcp_flags[1] = 0;
-        tcp_flags[2] = 0;
-        tcp_flags[4] = 1;
-
-		  tcphdr.th_flags = 0;
-		  for (i=0; i<8; i++) {
-			tcphdr.th_flags += (tcp_flags[i] << i);
+      && (ether_frame[57] & 0x14
+        || ether_frame[57] & 0x04)){
+        printf("A porta está aberta.\n");
+        break;
 		  }
         
-      memcpy (ether_frame + ETH_HDRLEN + IP6_HDRLEN, &tcphdr, TCP_HDRLEN * sizeof (uint8_t));
-        
-        if ((bytes = sendto (sd, ether_frame, frame_length, 0, (struct sockaddr *) &device, sizeof (device))) <= 0) {
-			perror ("sendto() failed");
-			exit (EXIT_FAILURE);
-		  }
-        
-      }
+      
 
     }
   
