@@ -286,8 +286,8 @@ int main (int argc, char **argv)
 		&& strcmp(src_ip,dst_iv6) == 0 
 		&& a == b 
 		&& c == d 
-		&& (ether_frame[67] & 0x14 
-		|| ether_frame[67] & 0x04)) {
+		&& (ether_frame[67] == 0x14 
+		|| ether_frame[67] == 0x04)) {
 			printf("Porta %d está FECHADA \n", d);
 			break;
 		} else {

@@ -285,7 +285,7 @@ int main (int argc, char **argv)
 		&& strcmp(src_ip,dst_ipv6) == 0
 		&& a == b
 		&& c == d
-		&& ether_frame[67] & 0x12){
+		&& ether_frame[67] == 0x12){
 			
 			tcp_flags[1] = 0;
 			tcp_flags[2] = 1;
@@ -334,8 +334,12 @@ int main (int argc, char **argv)
 				perror ("Falha ao executar função sendto(). Falha ao enviar pacote.");
 				exit (EXIT_FAILURE);
 			}
+			printf("Porta %d está ABERTA\n", d);
 		break;
 			
+		} else {
+			printf("Porta %d está FECHADA\n", d);
+			break;
 		}
 
 	}
